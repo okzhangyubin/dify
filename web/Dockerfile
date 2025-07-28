@@ -24,8 +24,8 @@ RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com/ --
 
 RUN pnpm install --frozen-lockfile
 
-# 调整：依赖安装后再清理缓存（解决 pnpm 命令未就绪问题）
-RUN pnpm cache clean --all  
+# 修复：pnpm cache clean 不支持--all选项，移除该参数
+RUN pnpm cache clean  
 RUN rm -rf node_modules
 
 
