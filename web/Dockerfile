@@ -3,7 +3,7 @@ FROM crpi-732ggfcslctj33s4.cn-guangzhou.personal.cr.aliyuncs.com/moredoc/dify-of
 LABEL maintainer="takatost@gmail.com"
 
 # if you located in China, you can use aliyun mirror to speed up
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN apk add --no-cache tzdata
 RUN npm install -g pnpm@10.13.1
@@ -20,23 +20,18 @@ COPY package.json .
 COPY pnpm-lock.yaml .
 
 # if you located in China, you can use taobao registry to speed up
-RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com/ --verbose
+# RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com/
 
-# 保留依赖安装结果，移除清理步骤（避免builder阶段丢失依赖）
-# 移除：RUN pnpm cache clean  
-# 移除：RUN rm -rf node_modules
-
+RUN pnpm install --frozen-lockfile
 
 # build resources
 FROM base AS builder
 WORKDIR /app/web
-COPY --from=packages /app/web/ .  # 从packages阶段复制完整的node_modules
+COPY --from=packages /app/web/ .
 COPY . .
 
-ENV NODE_OPTIONS="--max-old-space-size=6144"
-ENV NEXT_DEBUG=true  
-ENV DEBUG=next:*  
-RUN pnpm build --verbose
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN pnpm build
 
 
 # production stage
