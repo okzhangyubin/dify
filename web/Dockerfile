@@ -16,13 +16,20 @@ FROM base AS packages
 
 WORKDIR /app/web
 
+# 新增：清理缓存和旧依赖，确保安装环境干净
+RUN pnpm cache clean --all  
+RUN rm -rf node_modules
+
 COPY package.json .
 COPY pnpm-lock.yaml .
 
 # if you located in China, you can use taobao registry to speed up
-RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com/
+# 新增：--verbose 输出依赖安装详细日志，便于排查依赖问题
+RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com/ --verbose
 
+# 保留原有安装命令（确保依赖安装完整性）
 RUN pnpm install --frozen-lockfile
+
 
 # build resources
 FROM base AS builder
@@ -30,8 +37,14 @@ WORKDIR /app/web
 COPY --from=packages /app/web/ .
 COPY . .
 
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN pnpm build
+# 调整：增加内存分配至6GB，解决大型项目构建内存不足问题
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+# 新增：输出Next.js构建详细日志，定位具体失败步骤
+ENV NEXT_DEBUG=true  
+ENV DEBUG=next:*  
+
+# 新增：--verbose 输出构建详细日志
+RUN pnpm build --verbose
 
 
 # production stage
