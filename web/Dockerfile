@@ -22,17 +22,15 @@ COPY pnpm-lock.yaml .
 # if you located in China, you can use taobao registry to speed up
 RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com/ --verbose
 
-RUN pnpm install --frozen-lockfile
-
-# 修复：pnpm cache clean 不支持--all选项，移除该参数
-RUN pnpm cache clean  
-RUN rm -rf node_modules
+# 保留依赖安装结果，移除清理步骤（避免builder阶段丢失依赖）
+# 移除：RUN pnpm cache clean  
+# 移除：RUN rm -rf node_modules
 
 
 # build resources
 FROM base AS builder
 WORKDIR /app/web
-COPY --from=packages /app/web/ .
+COPY --from=packages /app/web/ .  # 从packages阶段复制完整的node_modules
 COPY . .
 
 ENV NODE_OPTIONS="--max-old-space-size=6144"
