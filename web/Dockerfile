@@ -1,5 +1,5 @@
 # base image
-FROM registry.aliyuncs.com/library/node:20-alpine3.19 AS base
+FROM hub-mirror.c.163.com/library/node:20-alpine3.19 AS base
 LABEL maintainer="takatost@gmail.com"
 
 # if you located in China, you can use aliyun mirror to speed up
