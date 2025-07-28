@@ -1,5 +1,5 @@
 # base image
-FROM crpi-732ggfcslctj33s4.cn-guangzhou.personal.cr.aliyuncs.com/moredoc/dify-node:18-alpine3.18 AS base
+FROM node:22-alpine3.21 AS base
 LABEL maintainer="takatost@gmail.com"
 
 # if you located in China, you can use aliyun mirror to speed up
